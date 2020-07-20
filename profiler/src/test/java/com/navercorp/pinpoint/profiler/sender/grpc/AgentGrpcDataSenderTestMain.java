@@ -32,10 +32,11 @@ import com.navercorp.pinpoint.profiler.JvmInformation;
 import com.navercorp.pinpoint.profiler.context.DefaultServerMetaData;
 import com.navercorp.pinpoint.profiler.context.grpc.GrpcMetadataMessageConverter;
 import com.navercorp.pinpoint.profiler.context.provider.grpc.DnsExecutorServiceProvider;
-import com.navercorp.pinpoint.profiler.context.provider.grpc.GrpcNameResolverProvider;
+import com.navercorp.pinpoint.profiler.context.provider.grpc.NameResolverFactoryProvider;
 import com.navercorp.pinpoint.profiler.context.thrift.MessageConverter;
 import com.navercorp.pinpoint.profiler.metadata.AgentInfo;
 import com.navercorp.pinpoint.profiler.monitor.metric.gc.JvmGcType;
+import io.grpc.NameResolver;
 import io.grpc.NameResolverProvider;
 
 import java.util.Collections;
@@ -56,12 +57,13 @@ public class AgentGrpcDataSenderTestMain {
         HeaderFactory headerFactory = new AgentHeaderFactory(AGENT_ID, APPLICATION_NAME, START_TIME);
 
         DnsExecutorServiceProvider dnsExecutorServiceProvider = new DnsExecutorServiceProvider();
-        GrpcNameResolverProvider grpcNameResolverProvider = new GrpcNameResolverProvider(dnsExecutorServiceProvider);
-        NameResolverProvider nameResolverProvider = grpcNameResolverProvider.get();
+
+        NameResolverFactoryProvider nameResolverFactoryProvider = new NameResolverFactoryProvider();
+        NameResolver.Factory factory = nameResolverFactoryProvider.get();
 
         ChannelFactoryBuilder channelFactoryBuilder = new DefaultChannelFactoryBuilder("TestAgentGrpcDataSender");
         channelFactoryBuilder.setHeaderFactory(headerFactory);
-        channelFactoryBuilder.setNameResolverProvider(nameResolverProvider);
+        channelFactoryBuilder.setNameResolverProvider(factory);
         channelFactoryBuilder.setClientOption(new ClientOption.Builder().build());
         ChannelFactory channelFactory = channelFactoryBuilder.build();
 

@@ -16,9 +16,6 @@
 
 package com.navercorp.pinpoint.profiler.context.provider.grpc;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.protobuf.GeneratedMessageV3;
 import com.navercorp.pinpoint.common.util.Assert;
 import com.navercorp.pinpoint.grpc.client.ChannelFactory;
 import com.navercorp.pinpoint.grpc.client.ChannelFactoryBuilder;
@@ -30,9 +27,20 @@ import com.navercorp.pinpoint.profiler.context.active.ActiveTraceRepository;
 import com.navercorp.pinpoint.profiler.context.grpc.GrpcTransportConfig;
 import com.navercorp.pinpoint.profiler.context.module.MetadataConverter;
 import com.navercorp.pinpoint.profiler.context.thrift.MessageConverter;
+import com.navercorp.pinpoint.profiler.receiver.ProfilerCommandLocatorBuilder;
+import com.navercorp.pinpoint.profiler.receiver.ProfilerCommandServiceLocator;
+import com.navercorp.pinpoint.profiler.receiver.grpc.GrpcActiveThreadCountService;
+import com.navercorp.pinpoint.profiler.receiver.grpc.GrpcActiveThreadDumpService;
+import com.navercorp.pinpoint.profiler.receiver.grpc.GrpcActiveThreadLightDumpService;
+import com.navercorp.pinpoint.profiler.receiver.grpc.GrpcEchoService;
 import com.navercorp.pinpoint.profiler.sender.EnhancedDataSender;
 import com.navercorp.pinpoint.profiler.sender.grpc.AgentGrpcDataSender;
 import com.navercorp.pinpoint.profiler.sender.grpc.ReconnectExecutor;
+
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.protobuf.GeneratedMessageV3;
+import io.grpc.NameResolver;
 import io.grpc.NameResolverProvider;
 
 import java.util.concurrent.ScheduledExecutorService;
@@ -49,7 +57,7 @@ public class AgentGrpcDataSenderProvider implements Provider<EnhancedDataSender<
     private final Provider<ReconnectExecutor> reconnectExecutorProvider;
     private final ScheduledExecutorService retransmissionExecutor;
 
-    private final NameResolverProvider nameResolverProvider;
+    private final NameResolver.Factory nameResolverProvider;
     private final ActiveTraceRepository activeTraceRepository;
 
     @Inject
@@ -58,7 +66,7 @@ public class AgentGrpcDataSenderProvider implements Provider<EnhancedDataSender<
                                        HeaderFactory headerFactory,
                                        Provider<ReconnectExecutor> reconnectExecutor,
                                        ScheduledExecutorService retransmissionExecutor,
-                                       NameResolverProvider nameResolverProvider,
+                                       NameResolver.Factory factory,
                                        ActiveTraceRepository activeTraceRepository) {
         this.grpcTransportConfig = Assert.requireNonNull(grpcTransportConfig, "grpcTransportConfig");
         this.messageConverter = Assert.requireNonNull(messageConverter, "messageConverter");
@@ -68,7 +76,7 @@ public class AgentGrpcDataSenderProvider implements Provider<EnhancedDataSender<
         this.retransmissionExecutor = Assert.requireNonNull(retransmissionExecutor, "retransmissionExecutor");
 
 
-        this.nameResolverProvider = Assert.requireNonNull(nameResolverProvider, "nameResolverProvider");
+        this.nameResolverProvider = Assert.requireNonNull(factory, "nameResolverProvider");
         this.activeTraceRepository = Assert.requireNonNull(activeTraceRepository, "activeTraceRepository");
     }
 

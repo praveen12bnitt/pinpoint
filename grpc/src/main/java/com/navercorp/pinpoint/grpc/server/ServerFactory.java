@@ -33,6 +33,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.WriteBufferWaterMark;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +59,7 @@ public class ServerFactory {
 
     private final ExecutorService bossExecutor;
     private final EventLoopGroup bossEventLoopGroup;
+
 
     private final ExecutorService workerExecutor;
     private final EventLoopGroup workerEventLoopGroup;
@@ -120,6 +122,8 @@ public class ServerFactory {
         NettyServerBuilder serverBuilder = NettyServerBuilder.forAddress(bindAddress);
         serverBuilder.bossEventLoopGroup(bossEventLoopGroup);
         serverBuilder.workerEventLoopGroup(workerEventLoopGroup);
+        serverBuilder.channelType(NioServerSocketChannel.class);
+
 
         setupInternal(serverBuilder);
 

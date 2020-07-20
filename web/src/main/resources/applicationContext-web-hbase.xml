@@ -3,7 +3,20 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
+
+    <bean id="cloudBigtable" class="com.navercorp.pinpoint.common.hbase.CloudBigTableProperties" >
+        <property name="enabled" value="${hbase.bigtable.enabled}" />
+        <property name="projectId" value="${hbase.bigtable.projectid}" />
+        <property name="instanceId" value="${hbase.bigtable.instanceid}" />
+        <property name="properties">
+            <props>
+                <!-- <prop key="test">test</prop> -->
+            </props>
+        </property>
+    </bean>
+
     <bean id="hbaseConfiguration" class="com.navercorp.pinpoint.common.hbase.HbaseConfigurationFactoryBean">
+        <property name="cloudBigTableProperties" ref="cloudBigtable" />
         <property name="properties">
             <props>
                 <prop key="hbase.zookeeper.quorum">${hbase.client.host}</prop>

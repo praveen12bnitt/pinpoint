@@ -50,7 +50,7 @@ public class HelloWorldSimpleClient implements HelloWorldClient {
                 // Channels are secure by default (via SSL/TLS). For the example we disable TLS to avoid
                 // needing certificates.
 //                .usePlaintext() // no API in old version
-                .usePlaintext(true)
+                .usePlaintext()
                 .intercept(MetadataUtils.newCaptureMetadataInterceptor(new AtomicReference<Metadata>(), new AtomicReference<Metadata>()))
                 .build());
     }

@@ -32,18 +32,7 @@ import com.navercorp.pinpoint.grpc.server.TransportMetadataServerInterceptor;
 import com.navercorp.pinpoint.grpc.trace.PSpan;
 import com.navercorp.pinpoint.grpc.trace.PSpanMessage;
 import com.navercorp.pinpoint.grpc.trace.SpanGrpc;
-import io.grpc.CallOptions;
-import io.grpc.Channel;
-import io.grpc.ClientCall;
-import io.grpc.ClientInterceptor;
-import io.grpc.ManagedChannel;
-import io.grpc.MethodDescriptor;
-import io.grpc.NameResolverProvider;
-import io.grpc.Server;
-import io.grpc.ServerInterceptor;
-import io.grpc.ServerTransportFilter;
-import io.grpc.Status;
-import io.grpc.internal.PinpointDnsNameResolverProvider;
+import io.grpc.*;
 import io.grpc.stub.StreamObserver;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -76,12 +65,12 @@ public class ChannelFactoryTest {
     private static ExecutorService executorService;
 
     private static ExecutorService dnsExecutorService;
-    private static NameResolverProvider nameResolverProvider;
+    private static NameResolver.Factory factory;
 
     @BeforeClass
     public static void setUp() throws Exception {
         dnsExecutorService = newCachedExecutorService("dnsExecutor");
-        nameResolverProvider = new PinpointDnsNameResolverProvider("dnsExecutor", dnsExecutorService);
+        factory = NameResolverRegistry.getDefaultRegistry().asFactory();
 
         executorService = Executors.newCachedThreadPool(PinpointThreadFactory.createThreadFactory("test-executor"));
         server = serverStart(executorService);
@@ -109,7 +98,7 @@ public class ChannelFactoryTest {
 
         ChannelFactoryBuilder channelFactoryBuilder = new DefaultChannelFactoryBuilder(this.getClass().getSimpleName());
         channelFactoryBuilder.setHeaderFactory(headerFactory);
-        channelFactoryBuilder.setNameResolverProvider(nameResolverProvider);
+        channelFactoryBuilder.setNameResolverProvider(factory);
         channelFactoryBuilder.addClientInterceptor(countRecordClientInterceptor);
         channelFactoryBuilder.setClientOption(new ClientOption.Builder().build());
         ChannelFactory channelFactory = channelFactoryBuilder.build();

@@ -17,6 +17,7 @@
 package com.navercorp.pinpoint.grpc.client;
 
 import io.grpc.ClientInterceptor;
+import io.grpc.NameResolver;
 import io.grpc.NameResolverProvider;
 
 
@@ -36,7 +37,7 @@ public interface ChannelFactoryBuilder {
 
     void setClientOption(ClientOption clientOption);
 
-    void setNameResolverProvider(NameResolverProvider nameResolverProvider);
+    void setNameResolverProvider(NameResolver.Factory nameResolverProvider);
 
     ChannelFactory build();
 
