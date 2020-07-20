@@ -19,10 +19,7 @@ package com.navercorp.pinpoint.grpc.client;
 import com.navercorp.pinpoint.common.profiler.concurrent.PinpointThreadFactory;
 import com.navercorp.pinpoint.common.util.Assert;
 import com.navercorp.pinpoint.grpc.ExecutorUtils;
-import io.grpc.ClientInterceptor;
-import io.grpc.ManagedChannel;
-import io.grpc.Metadata;
-import io.grpc.NameResolverProvider;
+import io.grpc.*;
 import io.grpc.netty.InternalNettyChannelBuilder;
 import io.grpc.netty.NettyChannelBuilder;
 import io.grpc.stub.MetadataUtils;
@@ -30,6 +27,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.WriteBufferWaterMark;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +56,7 @@ public class DefaultChannelFactory implements ChannelFactory {
     private final ClientOption clientOption;
 
     private final List<ClientInterceptor> clientInterceptorList;
-    private final NameResolverProvider nameResolverProvider;
+    private final NameResolver.Factory factory;
 
     // state object
     private final EventLoopGroup eventLoopGroup;
@@ -69,14 +67,14 @@ public class DefaultChannelFactory implements ChannelFactory {
     DefaultChannelFactory(String factoryName,
                                  int executorQueueSize,
                                  HeaderFactory headerFactory,
-                                 NameResolverProvider nameResolverProvider,
+                                 NameResolver.Factory factory,
                                  ClientOption clientOption,
                                  List<ClientInterceptor> clientInterceptorList) {
         this.factoryName = Assert.requireNonNull(factoryName, "factoryName");
         this.executorQueueSize = executorQueueSize;
         this.headerFactory = Assert.requireNonNull(headerFactory, "headerFactory");
         // @Nullable
-        this.nameResolverProvider = nameResolverProvider;
+        this.factory = factory;
         this.clientOption = Assert.requireNonNull(clientOption, "clientOption");
 
         Assert.requireNonNull(clientInterceptorList, "clientInterceptorList");
@@ -120,15 +118,16 @@ public class DefaultChannelFactory implements ChannelFactory {
         final NettyChannelBuilder channelBuilder = NettyChannelBuilder.forAddress(host, port);
         channelBuilder.usePlaintext();
         channelBuilder.eventLoopGroup(eventLoopGroup);
+        channelBuilder.channelType(NioSocketChannel.class);
         setupInternal(channelBuilder);
 
         addHeader(channelBuilder);
         addClientInterceptor(channelBuilder);
 
         channelBuilder.executor(executorService);
-        if (this.nameResolverProvider != null) {
-            logger.info("Set nameResolverProvider {}. channelName={}, host={}, port={}", this.nameResolverProvider, channelName, host, port);
-            channelBuilder.nameResolverFactory(this.nameResolverProvider);
+        if (this.factory != null) {
+            logger.info("Set nameResolverProvider {}. channelName={}, host={}, port={}", this.factory, channelName, host, port);
+            channelBuilder.nameResolverFactory(this.factory);
         }
         setupClientOption(channelBuilder);
 
@@ -197,7 +196,7 @@ public class DefaultChannelFactory implements ChannelFactory {
         sb.append(", headerFactory=").append(headerFactory);
         sb.append(", clientOption=").append(clientOption);
         sb.append(", clientInterceptorList=").append(clientInterceptorList);
-        sb.append(", nameResolverProvider=").append(nameResolverProvider);
+        sb.append(", factory=").append(factory);
         sb.append(", eventLoopGroup=").append(eventLoopGroup);
         sb.append(", eventLoopExecutor=").append(eventLoopExecutor);
         sb.append(", executorService=").append(executorService);

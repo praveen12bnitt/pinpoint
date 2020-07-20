@@ -18,6 +18,7 @@ package com.navercorp.pinpoint.grpc.client;
 
 import com.navercorp.pinpoint.common.util.Assert;
 import io.grpc.ClientInterceptor;
+import io.grpc.NameResolver;
 import io.grpc.NameResolverProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +40,7 @@ public class DefaultChannelFactoryBuilder implements ChannelFactoryBuilder {
     private ClientOption clientOption;
 
     private final LinkedList<ClientInterceptor> clientInterceptorList = new LinkedList<ClientInterceptor>();
-    private NameResolverProvider nameResolverProvider;
+    private NameResolver.Factory factory;
 
     public DefaultChannelFactoryBuilder(String factoryName) {
         this.factoryName = Assert.requireNonNull(factoryName, "factoryName");
@@ -74,8 +75,8 @@ public class DefaultChannelFactoryBuilder implements ChannelFactoryBuilder {
     }
 
     @Override
-    public void setNameResolverProvider(NameResolverProvider nameResolverProvider) {
-        this.nameResolverProvider = Assert.requireNonNull(nameResolverProvider, "nameResolverProvider");
+    public void setNameResolverProvider(NameResolver.Factory factory) {
+        this.factory = Assert.requireNonNull(factory, "nameResolverProvider");
     }
 
     @Override
@@ -85,7 +86,7 @@ public class DefaultChannelFactoryBuilder implements ChannelFactoryBuilder {
         Assert.requireNonNull(clientOption, "clientOption");
 
         return new DefaultChannelFactory(factoryName, executorQueueSize,
-                headerFactory, nameResolverProvider,
+                headerFactory, factory,
                 clientOption, clientInterceptorList);
     }
 }

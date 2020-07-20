@@ -31,6 +31,7 @@ import com.navercorp.pinpoint.profiler.context.module.MetadataConverter;
 import com.navercorp.pinpoint.profiler.context.thrift.MessageConverter;
 import com.navercorp.pinpoint.profiler.sender.EnhancedDataSender;
 import com.navercorp.pinpoint.profiler.sender.grpc.MetadataGrpcDataSender;
+import io.grpc.NameResolver;
 import io.grpc.NameResolverProvider;
 
 /**
@@ -40,13 +41,13 @@ public class MetadataGrpcDataSenderProvider implements Provider<EnhancedDataSend
     private final GrpcTransportConfig grpcTransportConfig;
     private final MessageConverter<GeneratedMessageV3> messageConverter;
     private final HeaderFactory headerFactory;
-    private final NameResolverProvider nameResolverProvider;
+    private final NameResolver.Factory nameResolverProvider;
 
     @Inject
     public MetadataGrpcDataSenderProvider(GrpcTransportConfig grpcTransportConfig,
                                           @MetadataConverter MessageConverter<GeneratedMessageV3> messageConverter,
                                           HeaderFactory headerFactory,
-                                          NameResolverProvider nameResolverProvider) {
+                                          NameResolver.Factory nameResolverProvider) {
         this.grpcTransportConfig = Assert.requireNonNull(grpcTransportConfig, "grpcTransportConfig");
         this.messageConverter = Assert.requireNonNull(messageConverter, "messageConverter");
         this.headerFactory = Assert.requireNonNull(headerFactory, "headerFactory");

@@ -19,6 +19,7 @@ import java.util.Enumeration;
 import java.util.Objects;
 import java.util.Properties;
 
+import com.google.cloud.bigtable.hbase.BigtableOptionsFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.springframework.beans.factory.FactoryBean;
@@ -34,6 +35,7 @@ public class HbaseConfigurationFactoryBean implements InitializingBean, FactoryB
     private Configuration configuration;
     private Configuration hadoopConfig;
     private Properties properties;
+    private CloudBigTableProperties cloudBigTableProperties;
 
     /**
      * Sets the Hadoop configuration to use.
@@ -53,9 +55,22 @@ public class HbaseConfigurationFactoryBean implements InitializingBean, FactoryB
         this.properties = properties;
     }
 
+    public CloudBigTableProperties getCloudBigTableProperties() {
+        return cloudBigTableProperties;
+    }
+
+    public void setCloudBigTableProperties(CloudBigTableProperties cloudBigTableProperties) {
+        this.cloudBigTableProperties = cloudBigTableProperties;
+    }
+
     public void afterPropertiesSet() {
+
         configuration = (hadoopConfig != null ? HBaseConfiguration.create(hadoopConfig) : HBaseConfiguration.create());
         addProperties(configuration, properties);
+
+        if(cloudBigTableProperties.isEnabled()) {
+            cloudBigTableProperties.configure(configuration);
+        }
     }
     
     /**

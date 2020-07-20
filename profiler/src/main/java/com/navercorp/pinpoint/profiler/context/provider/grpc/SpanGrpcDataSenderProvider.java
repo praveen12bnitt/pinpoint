@@ -38,6 +38,7 @@ import com.navercorp.pinpoint.grpc.client.interceptor.LoggingDiscardEventListene
 import com.navercorp.pinpoint.profiler.sender.grpc.ReconnectExecutor;
 import com.navercorp.pinpoint.profiler.sender.grpc.SpanGrpcDataSender;
 import io.grpc.ClientInterceptor;
+import io.grpc.NameResolver;
 import io.grpc.NameResolverProvider;
 
 /**
@@ -48,14 +49,14 @@ public class SpanGrpcDataSenderProvider implements Provider<DataSender<Object>> 
     private final MessageConverter<GeneratedMessageV3> messageConverter;
     private final HeaderFactory headerFactory;
     private final Provider<ReconnectExecutor> reconnectExecutor;
-    private final NameResolverProvider nameResolverProvider;
+    private final NameResolver.Factory nameResolverProvider;
 
     @Inject
     public SpanGrpcDataSenderProvider(GrpcTransportConfig grpcTransportConfig,
                                       @SpanConverter MessageConverter<GeneratedMessageV3> messageConverter,
                                       HeaderFactory headerFactory,
                                       Provider<ReconnectExecutor> reconnectExecutor,
-                                      NameResolverProvider nameResolverProvider) {
+                                      NameResolver.Factory nameResolverProvider) {
         this.grpcTransportConfig = Assert.requireNonNull(grpcTransportConfig, "grpcTransportConfig");
         this.messageConverter = Assert.requireNonNull(messageConverter, "messageConverter");
         this.headerFactory = Assert.requireNonNull(headerFactory, "headerFactory");

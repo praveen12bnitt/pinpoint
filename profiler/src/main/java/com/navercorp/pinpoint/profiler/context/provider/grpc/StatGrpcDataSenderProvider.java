@@ -32,6 +32,7 @@ import com.navercorp.pinpoint.profiler.context.thrift.MessageConverter;
 import com.navercorp.pinpoint.profiler.sender.DataSender;
 import com.navercorp.pinpoint.profiler.sender.grpc.ReconnectExecutor;
 import com.navercorp.pinpoint.profiler.sender.grpc.StatGrpcDataSender;
+import io.grpc.NameResolver;
 import io.grpc.NameResolverProvider;
 
 /**
@@ -42,19 +43,19 @@ public class StatGrpcDataSenderProvider implements Provider<DataSender<Object>> 
     private final MessageConverter<GeneratedMessageV3> messageConverter;
     private final HeaderFactory headerFactory;
     private final Provider<ReconnectExecutor> reconnectExecutorProvider;
-    private final NameResolverProvider nameResolverProvider;
+    private final NameResolver.Factory factory;
 
     @Inject
     public StatGrpcDataSenderProvider(GrpcTransportConfig grpcTransportConfig,
                                       @StatConverter MessageConverter<GeneratedMessageV3> messageConverter,
                                       HeaderFactory headerFactory,
                                       Provider<ReconnectExecutor> reconnectExecutor,
-                                      NameResolverProvider nameResolverProvider) {
+                                      NameResolver.Factory factory) {
         this.grpcTransportConfig = Assert.requireNonNull(grpcTransportConfig, "profilerConfig");
         this.messageConverter = Assert.requireNonNull(messageConverter, "messageConverter");
         this.headerFactory = Assert.requireNonNull(headerFactory, "agentHeaderFactory");
         this.reconnectExecutorProvider = Assert.requireNonNull(reconnectExecutor, "reconnectExecutorProvider");
-        this.nameResolverProvider = Assert.requireNonNull(nameResolverProvider, "nameResolverProvider");
+        this.factory = Assert.requireNonNull(factory, "factory");
     }
 
     @Override
@@ -77,7 +78,7 @@ public class StatGrpcDataSenderProvider implements Provider<DataSender<Object>> 
 
         ChannelFactoryBuilder channelFactoryBuilder = new DefaultChannelFactoryBuilder("StatGrpcDataSender");
         channelFactoryBuilder.setHeaderFactory(headerFactory);
-        channelFactoryBuilder.setNameResolverProvider(nameResolverProvider);
+        channelFactoryBuilder.setNameResolverProvider(factory);
         channelFactoryBuilder.addClientInterceptor(unaryCallDeadlineInterceptor);
         channelFactoryBuilder.setExecutorQueueSize(channelExecutorQueueSize);
         channelFactoryBuilder.setClientOption(clientOption);

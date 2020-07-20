@@ -34,23 +34,17 @@ import com.navercorp.pinpoint.profiler.context.grpc.GrpcMessageToResultConverter
 import com.navercorp.pinpoint.profiler.context.grpc.GrpcMetadataMessageConverterProvider;
 import com.navercorp.pinpoint.profiler.context.grpc.GrpcSpanMessageConverterProvider;
 import com.navercorp.pinpoint.profiler.context.grpc.GrpcStatMessageConverterProvider;
-import com.navercorp.pinpoint.profiler.context.provider.grpc.AgentGrpcDataSenderProvider;
-import com.navercorp.pinpoint.profiler.context.provider.grpc.AgentHeaderFactoryProvider;
-import com.navercorp.pinpoint.profiler.context.provider.grpc.DnsExecutorServiceProvider;
-import com.navercorp.pinpoint.profiler.context.provider.grpc.GrpcNameResolverProvider;
-import com.navercorp.pinpoint.profiler.context.provider.grpc.GrpcSpanProcessorProvider;
-import com.navercorp.pinpoint.profiler.context.provider.grpc.GrpcTransportConfigProvider;
-import com.navercorp.pinpoint.profiler.context.provider.grpc.MetadataGrpcDataSenderProvider;
-import com.navercorp.pinpoint.profiler.context.provider.grpc.ReconnectExecutorProvider;
-import com.navercorp.pinpoint.profiler.context.provider.grpc.ReconnectSchedulerProvider;
-import com.navercorp.pinpoint.profiler.context.provider.grpc.SpanGrpcDataSenderProvider;
-import com.navercorp.pinpoint.profiler.context.provider.grpc.StatGrpcDataSenderProvider;
+import com.navercorp.pinpoint.profiler.context.provider.grpc.*;
 import com.navercorp.pinpoint.profiler.context.thrift.MessageConverter;
 import com.navercorp.pinpoint.profiler.sender.DataSender;
 import com.navercorp.pinpoint.profiler.sender.EnhancedDataSender;
 import com.navercorp.pinpoint.profiler.sender.ResultResponse;
 import com.navercorp.pinpoint.profiler.sender.grpc.ReconnectExecutor;
+import io.grpc.NameResolver;
 import io.grpc.NameResolverProvider;
+import io.grpc.NameResolverRegistry;
+import io.grpc.internal.BaseDnsNameResolverProvider;
+import io.grpc.internal.DnsNameResolverProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,9 +69,11 @@ public class GrpcModule extends PrivateModule {
         logger.info("configure {}", this.getClass().getSimpleName());
 
         bind(GrpcTransportConfig.class).toProvider(GrpcTransportConfigProvider.class).in(Scopes.SINGLETON);
+
         // dns executor
         bind(ExecutorService.class).toProvider(DnsExecutorServiceProvider.class).in(Scopes.SINGLETON);
-        bind(NameResolverProvider.class).toProvider(GrpcNameResolverProvider.class).in(Scopes.SINGLETON);
+
+        bind(NameResolver.Factory.class).toProvider(NameResolverFactoryProvider.class).in(Scopes.SINGLETON);
         bind(HeaderFactory.class).toProvider(AgentHeaderFactoryProvider.class).in(Scopes.SINGLETON);
 
         bind(ScheduledExecutorService.class).toProvider(ReconnectSchedulerProvider.class).in(Scopes.SINGLETON);
